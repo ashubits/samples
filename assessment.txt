@@ -1,0 +1,11 @@
+1. Download the files from https://github.com/ashubits/samples/blob/master/assignment.zip
+2. unzip files
+
+Provide below info 
+
+1. type of file
+2. sha256
+3. type of file
+4. whether the file is packed 
+4. any malicious indicator found  (u can use virustotal.com)
+ 
