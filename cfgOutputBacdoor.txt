@@ -1,0 +1,315 @@
+**1. `sub_401000(int a1, unsigned int a2)`**
+
+*   **Purpose:** This function seems to implement a part of a bit manipulation or encoding algorithm. It checks a bit in `a2` based on `a1` and modifies `a2` based on certain bitwise operations and conditional logic. It looks like a component of a larger cipher or hashing algorithm.
+*   **CFG:**
+    *   Start
+    *   Check if `a1` is equal to the 9th bit of `a2`.
+        *   **If True:** Return `a2`.
+        *   **If False:**
+            *   Calculate `result = 2 * (a2 & 0x3FFFF)`.
+            *   Check a complex bitwise condition involving `a2`.
+                *   **If Condition True:** Return `result ^ 1`.
+                *   **If Condition False:** Return `result`.
+    *   End
+
+**2. `sub_401040(int a1, unsigned int a2)`**
+
+*   **Purpose:** Similar to `sub_401000`, this function also appears to be part of a bit manipulation or encoding algorithm, likely related to the previous one. It checks a different bit (11th) of `a2` and uses different bitwise operations (0x1FFFFF, 4-bit shifts) and a different conditional check (0x1000).
+*   **CFG:**
+    *   Start
+    *   Check if `a1` is equal to the 11th bit of `a2`.
+        *   **If True:** Return `a2`.
+        *   **If False:**
+            *   Calculate `result = 2 * (a2 & 0x1FFFFF)`.
+            *   Check a complex bitwise condition involving `a2`.
+                *   **If Condition True:** Return `result ^ 1`.
+                *   **If Condition False:** Return `result`.
+    *   End
+
+**3. `sub_401080(int a1, unsigned int a2)`**
+
+*   **Purpose:**  Another function in the same family, continuing the bit manipulation pattern. It again checks the 11th bit, uses a mask of 0x3FFFFF, and yet another conditional check (0x20000 and different bitwise shifts).
+*   **CFG:**
+    *   Start
+    *   Check if `a1` is equal to the 11th bit of `a2`.
+        *   **If True:** Return `a2`.
+        *   **If False:**
+            *   Calculate `result = 2 * (a2 & 0x3FFFFF)`.
+            *   Check a complex bitwise condition involving `a2`.
+                *   **If Condition True:** Return `result ^ 1`.
+                *   **If Condition False:** Return `result`.
+    *   End
+
+**4. `sub_4010C0(int *a1, char *a2)`**
+
+*   **Purpose:** This function appears to be involved in data packing or conversion. It takes a character array `a2` and packs parts of it into an integer array `a1`. It looks like it's converting a byte stream into a series of integers, possibly for encryption or decryption.
+*   **CFG:**
+    *   Start
+    *   Calculate `a1[0]` by combining bits from `a2[0]`, `a2[1]`, and `a2[2]`.
+    *   Calculate `a1[1]` by combining bits from `a2[2]`, `a2[3]`, `a2[4]`, and `a2[5]`.
+    *   Calculate `a1[2]` by combining bits from `a2[5]`, `a2[6]`, and `a2[7]`.
+    *   Return the original value of `a2[7]`.
+    *   End
+
+**5. `sub_401130(unsigned int *a1)`**
+
+*   **Purpose:** This function orchestrates the previous bit manipulation functions (`sub_401000`, `sub_401040`, `sub_401080`). It seems to apply these transformations sequentially to the integer array `a1`.  It also performs an XOR operation and returns a bit. This looks like a round function in a block cipher.
+*   **CFG:**
+    *   Start
+    *   Call `sub_401190` to get a value `v1` based on `a1[0]`, `a1[1]`, `a1[2]`.
+    *   Call `sub_401000` with `v1` and `a1[0]`, update `a1[0]`.
+    *   Call `sub_401040` with `v1` and `a1[1]`, update `a1[1]`.
+    *   Call `sub_401080` with `v1` and `a1[2]`, update `a1[2]`.
+    *   Calculate `v7 = a1[0] ^ a1[1]`.
+    *   Return `((unsigned __int8)v6 ^ v7) & 1`. (where v6 is the result of `sub_401080`)
+    *   End
+
+**6. `sub_401190(char a1, __int16 a2, __int16 a3)`**
+
+*   **Purpose:** This is a helper function for `sub_401130`. It checks specific bits in its three input arguments and returns a boolean-like value (0 or 1) based on whether the sum of certain bit checks is less than or equal to 1. This is likely a condition check within the cipher algorithm.
+*   **CFG:**
+    *   Start
+    *   Check if the 11th bit of `a3` is set (0x800).
+    *   Check if the 11th bit of `a2` is set (0x800).
+    *   Check if the 8th bit of `a1` is set (0x80).
+    *   Sum the results of these checks (treating true as 1, false as 0).
+    *   Return `true` if the sum is less than or equal to 1, `false` otherwise.
+    *   End
+
+**7. `sub_4011E0(unsigned int *a1, int a2, int a3)`**
+
+*   **Purpose:** This function performs encryption or decryption. It iterates `a3` times, calling `sub_401130` in each iteration to modify the `a1` array (likely the state of the cipher). It then XORs bytes in memory starting at address `a2` with a value derived from the loop counter and the output of `sub_401130`.
+*   **CFG:**
+    *   Start
+    *   Initialize `v3 = 0` and `i = 1`.
+    *   Loop `v3` from 0 to `a3` (exclusive):
+        *   Call `sub_401130(a1)` and update `i = sub_401130(a1) | (2 * i)`.
+        *   XOR the byte at memory address `v3 + a2` with `i`.
+    *   End
+
+**8. `sub_401220(unsigned int *a1, int a2, int a3)`**
+
+*   **Purpose:** This function is a simple wrapper around `sub_4011E0`. It directly calls `sub_4011E0` with the same arguments. It's likely just an alias or a slightly different entry point for the same encryption/decryption logic.
+*   **CFG:**
+    *   Start
+    *   Call `sub_4011E0(a1, a2, a3)`.
+    *   End
+
+**9. `WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)`**
+
+*   **Purpose:** This is the main entry point of a Windows application. It loads a string resource, calls `sub_4012C0` (which appears to be the core backdoor logic), and then exits.  It's the program's starting point.
+*   **CFG:**
+    *   Start
+    *   Load string resource (ID 1u) into `Str`.
+    *   Call `sub_4012C0(&Str)`.
+    *   Return 0.
+    *   End
+
+**10. `sub_401270(SOCKET s, char *buf, int len)`**
+
+*   **Purpose:** This function is a custom send function for sockets. It ensures that the entire buffer `buf` of length `len` is sent over the socket `s`, handling potential partial sends and errors. It's a robust send wrapper.
+*   **CFG:**
+    *   Start
+    *   Initialize `v3 = len`.
+    *   If `len <= 0`, return `len`.
+    *   Loop:
+        *   Call `send(s, buf, v3, 0)` and store result in `v5`.
+        *   If `v5 < 0`, return -1 (error).
+        *   If `v5 == 0`, break the loop.
+        *   Subtract `v5` from `v3` and add `v5` to `buf` pointer.
+        *   If `v3 <= 0`, return `len` (success).
+    *   Return `len - v3` (success, potentially less data sent if the loop broke).
+    *   End
+
+**11. `sub_4012C0()`**
+
+*   **Purpose:** This function sets up the backdoor. It creates two events (`hObject`, `hEvent`), initializes a memory region (`unk_4030E0`), calls `sub_401320` (likely to establish a network connection and handle initial communication), waits briefly on `hObject`, and then closes `hObject`. This seems to be the core initialization routine.
+*   **CFG:**
+    *   Start
+    *   Create event `hObject` (manual reset, non-signaled).
+    *   Create event `hEvent` (manual reset, non-signaled).
+    *   `memset` a memory region `unk_4030E0` to 0.
+    *   Call `sub_401320()`.
+    *   Wait for `hObject` to be signaled (with a timeout of 0, so it's likely just checking if it's already signaled).
+    *   Close `hObject`.
+    *   Return the result of `CloseHandle(hObject)`.
+    *   End
+
+**12. `sub_401320()`**
+
+*   **Purpose:** This is the network connection and command processing function. It parses a string resource (`Str`) for IP and port, establishes a socket connection, sends computer name, and then enters a loop to receive commands. It looks like the main network control loop of the backdoor.
+*   **CFG:**
+    *   Start
+    *   Parse `Str` to extract IP address (`cp`) and port (`String`).
+    *   Get computer name into `Buffer`.
+    *   Initialize Winsock using `WSAStartup`.
+    *   Create a socket (`v4`).
+    *   **If socket creation fails:**
+        *   Close socket (-1).
+        *   Sleep for a long time (0x927C0u).
+    *   **Else (socket creation success):**
+        *   Set socket address (`name`) using parsed IP and port, and address family.
+        *   Connect to the server (`connect`).
+        *   **If connection fails:**
+            *   Close socket (`v4`).
+            *   Sleep briefly (0x3E8u).
+        *   **Else (connection success):**
+            *   Send computer name to the server using `sub_401270`.
+            *   Loop (receive commands):
+                *   Receive data from the socket (`recv`).
+                *   **If `recv` returns > 0:**
+                    *   Check if the received data starts with "*(SY)#".
+                        *   **If it does:**
+                            *   Check if it starts with "*(SY)# cmd".
+                                *   **If it does:**
+                                    *   Start a new thread using `StartAddress` with socket `v4` as argument.
+                                    *   `ExitThread(0)`.
+                                *   **If it doesn't start with "*(SY)# cmd":**
+                                    *   `ExitThread(0)`. (Label_20 is reached and then exits)
+                    *   If `strnicmp` fails (data doesn't start with "*(SY)#"), continue looping to receive more data.
+                *   **If `recv` returns -1:**
+                    *   Return `sub_401B50()`.
+    *   Return `sub_401B50()` (reached if the initial parsing fails or after the loop breaks due to recv error).
+    *   End
+
+**13. `sub_401600()`**
+
+*   **Purpose:** This function creates a pair of pipes and a new process (`cmd.exe`) connected to these pipes. It's setting up communication channels to run commands in a separate process and capture their output.
+*   **CFG:**
+    *   Start
+    *   Allocate memory for pipe handles (`v0`).
+    *   Create two pipes:
+        *   Read end in `v0`, Write end in `hWritePipe`.
+        *   Read end in `hReadPipe`, Write end in `v0+1`.
+    *   **If both pipe creations succeed:**
+        *   Call `sub_401860` to create a process (`cmd.exe`) with pipes and store process handle in `v0+2`.
+        *   Close `hReadPipe` and `hWritePipe`.
+        *   Return `v0`.
+    *   **Else (pipe creation fails):**
+        *   Clean up any handles created (`v0`, `hWritePipe`, `v0+1`, `hReadPipe`).
+        *   Free allocated memory `v0`.
+        *   Return 0.
+    *   End
+
+**14. `StartAddress(void *a1)`**
+
+*   **Purpose:** This function is the entry point for a new thread. It allocates memory, calls `sub_401600` to set up pipes and `cmd.exe`, and then creates two more threads (`sub_401940`, `sub_401A70`) to handle communication with the `cmd.exe` process. It manages command execution and output retrieval.
+*   **CFG:**
+    *   Start
+    *   Allocate memory (unused).
+    *   Call `sub_401600` to create pipes and `cmd.exe`, store pipe handles in `v1`.
+    *   Create thread using `sub_401940` and pass `v1` as argument, store thread handle in `v1+4`.
+    *   Create thread using `sub_401A70` and pass `v1` as argument, store thread handle in `v1+5`.
+    *   Wait for all three handles (`v1[4]`, `v1[5]`, `v1[2]`) to be signaled (using `WaitForMultipleObjects`).
+    *   Depending on the return value of `WaitForMultipleObjects`, terminate threads and/or the `cmd.exe` process.
+    *   Clean up socket and pipe handles.
+    *   Free allocated memory `v1`.
+    *   Call `sub_401B50()`.
+    *   End
+
+**15. `sub_401860(void *a1, HANDLE hSourceHandle)`**
+
+*   **Purpose:** This function creates a new process (likely `cmd.exe`) and sets up its standard input, output, and error streams to be the provided pipe handles. It's responsible for launching the command interpreter process connected to the pipes created in `sub_401600`.
+*   **CFG:**
+    *   Start
+    *   Initialize `STARTUPINFOA` structure, setting handles for stdInput, stdOutput, stdError to the pipe handles (`a1`, `hSourceHandle`).
+    *   Duplicate `hSourceHandle` to be used as `hStdError`.
+    *   Prepare command line to execute "cmd.exe".
+    *   Create a new process using `CreateProcessA` with the prepared `STARTUPINFOA`, launching "cmd.exe" with redirected standard streams.
+    *   **If process creation fails:** Return 0.
+    *   **Else (process creation success):**
+        *   Close the thread handle from `ProcessInformation`.
+        *   Return the process handle from `ProcessInformation`.
+    *   End
+
+**16. `sub_401940(const void *lpThreadParameter)`**
+
+*   **Purpose:** This thread function handles reading output from the `cmd.exe` process (from the read end of a pipe) and sending it back over the network socket. It's the data exfiltration thread, sending command execution results back to the attacker.
+*   **CFG:**
+    *   Start
+    *   Allocate memory and copy thread parameters (`lpThreadParameter`).
+    *   Loop:
+        *   Check if there is data to read from the pipe using `PeekNamedPipe`.
+        *   **If data available (`BytesRead > 0`):**
+            *   Read data from the pipe using `ReadFile` into `Buffer`.
+            *   Decrypt the buffer using `sub_4010C0` and `sub_4011E0` (using `byte_403014` as key).
+            *   Convert `BytesRead` to string using `itoa`.
+            *   Send the length of data and then the encrypted data back over the socket using `send` and `sub_401270`.
+            *   If sending fails at any point, break the loop.
+        *   **Else (no data available):**
+            *   Sleep briefly (0x32u).
+    *   Free allocated memory.
+    *   `ExitThread(0)`.
+    *   End
+
+**17. `sub_401A70(const void *lpThreadParameter)`**
+
+*   **Purpose:** This thread function handles receiving commands from the network socket and writing them to the standard input of the `cmd.exe` process (via the write end of a pipe). It's the command reception and execution thread.
+*   **CFG:**
+    *   Start
+    *   Allocate memory and copy thread parameters (`lpThreadParameter`).
+    *   Loop (receive commands):
+        *   Receive data from the socket (`recv`).
+        *   Decrypt the received data using `sub_4010C0` and `sub_401220` (using `byte_403014` as key).
+        *   Check if the received data is "exit\\r\\n" using `strnicmp`.
+            *   **If it is "exit\\r\\n":**
+                *   Signal the event `hEvent`.
+                *   Free allocated memory.
+                *   `ExitThread(0)`.
+        *   Write the received and decrypted command to the write end of the pipe connected to `cmd.exe` using `WriteFile`.
+        *   If `recv` returns -1 (error), break the loop.
+    *   Free allocated memory.
+    *   `ExitThread(0)`.
+    *   End
+
+**18. `sub_401B50()`**
+
+*   **Purpose:** This function is likely the self-deletion routine. It attempts to delete the executable file from disk using `cmd.exe /c del <executable_path> > nul` and then exits the process. This is a common technique in malware to remove traces after execution.
+*   **CFG:**
+    *   Start
+    *   Get the full path of the current executable using `GetModuleFileNameA` and shorten it using `GetShortPathNameA`.
+    *   Get the path to `COMSPEC` (command interpreter) from environment variables.
+    *   Construct a command string to delete the executable file using `cmd.exe /c del <executable_path> > nul`.
+    *   Set up `SHELLEXECUTEINFOA` structure to execute the delete command.
+    *   Set priority class and thread priority for the current process.
+    *   Execute the delete command using `ShellExecuteExA`.
+    *   **If `ShellExecuteExA` succeeds:**
+        *   Set priority of the newly created process.
+        *   Disable priority boost.
+        *   Notify shell changes using `SHChangeNotify`.
+        *   Return 1.
+    *   **Else (if `ShellExecuteExA` fails):**
+        *   Set priority class and thread priority back to lower values for the current process.
+    *   Return 0.
+    *   End
+
+**19. `UserMathErrorFunction()`**
+
+*   **Purpose:** This function simply returns 0. It's likely a placeholder or an unused function, possibly a vestige from compiler optimizations or debugging.
+*   **CFG:**
+    *   Start
+    *   Return 0.
+    *   End
+
+**Overall Purpose of the Code:**
+
+This code is a **backdoor malware**.
+
+**Key functionalities pointing to this conclusion:**
+
+*   **Network Communication:** Establishes a socket connection to a remote server, likely controlled by an attacker.
+*   **Command Execution:** Spawns `cmd.exe` and redirects input/output through pipes, allowing remote command execution on the compromised machine.
+*   **Data Exfiltration:** Sends the output of executed commands back to the attacker over the network.
+*   **Encryption/Encoding:** Uses bit manipulation functions (`sub_401000`, `sub_401040`, `sub_401080`, `sub_4010C0`, `sub_401130`, `sub_4011E0`, `sub_401220`) to obfuscate communication, likely encrypting command output before sending and decrypting commands received.
+*   **Self-Deletion:** Attempts to delete itself after execution to evade detection.
+*   **Stealth:** Includes delays (`Sleep`) and priority manipulation (`SetPriorityClass`, `SetThreadPriority`) which are common in malware to reduce resource usage and avoid suspicion.
+
+**In summary, the code is designed to:**
+
+1.  Connect to a remote server.
+2.  Receive commands from the server.
+3.  Execute shell commands on the infected system.
+4.  Send the output of commands back to the attacker.
+5.  Attempt to delete itself after execution.
+
+This behavior is characteristic of a backdoor Trojan, allowing unauthorized remote access and control over the infected computer.
